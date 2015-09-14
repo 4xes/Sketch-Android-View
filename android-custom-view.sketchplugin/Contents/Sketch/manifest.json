@@ -1,0 +1,27 @@
+{
+    "name": "Android vector view",
+    "description" : "A plugin which create custom view from sketch",
+    "author": "Alexey Petrushin",
+    "version" : "1.0",
+    "version": 0.1,
+    "identifier": "com.petrushin.alex.android.vector.view",
+
+    "compatibleVersion": 3,
+    "bundleVersion": 1,
+    "commands":
+        [
+            {
+                "name": "Generate path view",
+                "identifier": "path-view",
+                "shortcut": "shift t",
+                "script": "generate_view.js",
+                "handler": "onRun"
+            }
+        ],
+    "menu": {
+        "items": [
+            "path-view"
+        ],
+        "isroot": "true"
+    }
+}
