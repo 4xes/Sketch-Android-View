@@ -1,51 +1,51 @@
 var f = {};
 /*
-It pulls out all shapes of the selected object
+It pulls out all figures of the selected object
 @out
 */
 f.fetch = function (obj, error){
-    var shapes = [];
+    var figures = [];
+    figures['paths'] = [];
+    figures['texts'] = [];
+
     if(!obj){
       error('Nothing is fetching');
       return null;
     }
 
-    f.fetching(shapes, obj);
+    f.fetching(figures, obj);
 
-    if(shapes.length == 0){
-      error('Can\'t find shapes');
+    if(figures['paths'].length == 0 && figures['texts'].length == 0){
+      error('Can\'t find figures');
       return null;
     }
-    return shapes;
+    return figures;
 };
 
-f.fetching = function (shapes, obj) {
+f.fetching = function (figures, obj) {
   switch ([obj class]) {
     case __NSArrayI:
-      f.fetch_NSArrayI(shapes, obj);
+      f.fetchArray(figures, obj);
       break;
     case MSLayerGroup:
-      f.fetch_NSArrayI(shapes, [obj layers])
-      break;
     case MSShapeGroup:
-      f.fetch_NSArrayI(shapes, [obj layers]);
+      f.fetchArray(figures, [obj layers]);
       break;
     case MSShapePathLayer:
-      //фигура
-      shapes.push(obj);
+      figures['paths'].push(obj);
       break;
-
-    default:
+    case MSShapePathLayer:
+      figures['texts'].push(obj);
       break;
   }
 };
 
-f.fetch_NSArrayI = function(shapes, obj){
+f.fetchArray = function(figures, obj){
   if([obj count] == 0){
     return [];
   }else{
     for(var i = 0; i < [obj count]; i++){
-      f.fetching(shapes, [obj objectAtIndex:i]);
+      f.fetching(figures, [obj objectAtIndex:i]);
     }
   }
 };

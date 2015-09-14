@@ -8,20 +8,18 @@ var PLUGIN_PATH = '/Users/alex/Library/Application\ Support/com.bohemiancoding.s
 var OUT_DIR = '/Users/alex/Documents/Projects/Plugin/out/';
 
 var onRun = function (context) {
-
 	var doc = context.document;
-
 	var selection = context.selection;
 
-
-	var shapes = f.fetch(selection, function(message) {
-    ui.alert('Error', 'Fetch: ' + message);
+	var figures = f.fetch(selection, function(message) {
+    	ui.alert('Error', 'Fetch: ' + message);
 	});
 
-	if(!shapes){
+	if(!figures){
 		return;
 	}
-	var message = 'Shapes are ' + shapes.length;
+
+	var message = 'Shapes are ' + figures['paths'].length;
 	ui.alert('Shapes', message);
 
 	var surficeSize = '(int)((' + selection[0].frame().x() + 'f * 2f + ' + selection[0].frame().width() + 'f) * density), '
@@ -38,8 +36,18 @@ var onRun = function (context) {
 		SurficeSize: surficeSize
 	};
 
-	for(var i = 0; i < shapes.length; i++){
-		var shape = code.getShape(shapes[i]);
+	for(var i = 0; i < figures['paths'].length; i++){
+		var shape = new Shape(figures['paths'][i]);
+		if(shape.canDraw()){
+			data.shapesProperties += shape.getProperty();
+			data.shapesInit += shape.getShapeInit();
+			data.regionsInit += shape.getRegionInit();
+			data.draw += shape.getDraw();
+		}
+	}
+
+	for(var i = 0; i < figures['texts'].length; i++){
+		var shape = new Shape(figures['texts'][i]);
 		if(shape.canDraw()){
 			data.shapesProperties += shape.getProperty();
 			data.shapesInit += shape.getShapeInit();
