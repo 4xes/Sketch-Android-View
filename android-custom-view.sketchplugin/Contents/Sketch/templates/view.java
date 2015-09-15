@@ -38,8 +38,6 @@ public class {{fileName}} extends View{
 {{shapesProperties}}
 {{paintsProperties}}
 
-
-
     public {{fileName}}(Context context) {
         super(context);
         init(context);

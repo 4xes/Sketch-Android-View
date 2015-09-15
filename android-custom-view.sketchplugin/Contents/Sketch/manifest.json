@@ -3,6 +3,7 @@
     "description" : "A plugin which create custom view from sketch",
     "author": "Alexey Petrushin",
     "version" : "1.0",
+    "authorEmail" : "petrushinalex@gmail.com",
     "version": 0.1,
     "identifier": "com.petrushin.alex.android.vector.view",
 

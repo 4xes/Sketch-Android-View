@@ -45,16 +45,12 @@ var onRun = function (context) {
 			data.draw += shape.getDraw();
 		}
 	}
-
+	var paints = new Paints();
 	for(var i = 0; i < figures['texts'].length; i++){
-		var shape = new Shape(figures['texts'][i]);
-		if(shape.canDraw()){
-			data.shapesProperties += shape.getProperty();
-			data.shapesInit += shape.getShapeInit();
-			data.regionsInit += shape.getRegionInit();
-			data.draw += shape.getDraw();
-		}
+		var text = figures['texts'][i];
+		paints.addPaint(text);
 	}
+	log(paints);
 	writeTemplate("view.java", OUT_DIR + data.className + '.java', data);
 };
 
