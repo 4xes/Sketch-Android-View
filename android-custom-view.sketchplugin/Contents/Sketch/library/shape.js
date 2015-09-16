@@ -8,53 +8,125 @@ var sp = '    ';
 var sp2x = sp + sp;
 
 var Paints = function(){
-    this.styles = {};
-    this.styles['textPaint'] = {};
-    this.styles['namePaint'] = {};
-    this.styles['propertiesPaint'] = {};
-    this.styles['initPaint'] = {};
-    this.numberPaint = 0;
+    this.db = {};
+    this.db['paint'] = {};
+    this.db['names'] = {};
+    this.db['properties'] = [];
+    this.db['inits'] = [];
+    this.count = 0;
+}
+
+Paints.prototype.properties = function(){
+    return this.db['properties'];
+}
+
+Paints.prototype.inits = function(){
+    return this.db['inits'];
+}
+
+Paints.prototype.newTextName = function(){
+    return 'paintText' + (this.count++);
+}
+
+Paints.prototype.newFillName = function(){
+    return 'paintFill' + (this.count++);
+}
+
+Paints.prototype.newBorderName = function(){
+    return 'paintBorder' + (this.count++);
+}
+
+Paints.prototype.newProperty = function(name){
+    return sp + 'private Paint ' + name + ';\n';
 }
 
 Paints.prototype.addPaint = function(item){
     if(item.className() == 'MSTextLayer'){
         var property = item.style().sharedObjectID();
-        if (!this.styles['textPaint'].hasOwnProperty(property)) {
-            this.styles['textPaint'][property] = item.style();
-            var name = 'paint' + this.numberPaint;
-            this.styles['namePaint'][property] = name;
-            this.styles['propertiesPaint'][property] = sp + 'private Paint ' + name + ';';
-            this.styles['initPaint'][property] = this.createInitTextPaint(item, name);
-            this.numberPaint++;
+        if (!this.db['paint'].hasOwnProperty(property)) {
+            this.db['paint'][property] = item.style();
+
+            var textName = this.newTextName();
+            this.db['names'][property] = textName;
+            this.db['properties'].push(this.newProperty(textName));
+            this.db['inits'].push(this.createInitTextPaint(item, textName));
+        }
+    }
+
+    if(item.className() == 'MSShapePathLayer'){
+        var parent = item.parentGroup();
+        var property = parent.style().objectID();
+
+        if (!this.db['paint'].hasOwnProperty(property)) {
+            this.db['paint'][property] = parent.style();
+
+            var fill = [[parent style] fill];
+            var border = [[parent style] border];
+
+            var nameFill = fill? this.newFillName(): null;
+            var nameBorder = border? this.newBorderName(): null;
+
+            this.db['names'][property] = {'fill': nameFill, 'border': nameBorder};
+
+            if(fill){
+                this.db['properties'].push(this.newProperty(nameFill));
+                this.db['inits'].push(this.newInitFillPaint(parent, nameFill));
+            }
+            if(border){
+                this.db['properties'].push(this.newProperty(nameBorder));
+                this.db['inits'].push(this.newInitBorderPaint(parent, nameBorder));
+            }
         }
     }
 }
 
+Paints.prototype.newInitBorderPaint = function(parent, name){
+    var color = [[[parent style] border] color];
+    var thickness = [[[parent style] border] thickness];
+    return sp2x + name + ' = new Paint();\n' +
+         sp2x + name + '.setAntiAlias(true);\n' +
+         sp2x + name + '.setColor(' + this.parseFullColor(color) + ');\n' +
+         sp2x + name + '.setStyle(Paint.Style.STROKE);\n' +
+         sp2x + name + '.setStrokeWidth(' + thickness + 'f * density);\n';
+}
+
+Paints.prototype.newInitFillPaint = function(parent, name){
+    var color = [[[parent style] fill] color];
+    return sp2x + name + ' = new Paint();\n' +
+         sp2x + name + '.setAntiAlias(true);\n' +
+         sp2x + name + '.setColor(' + this.parseFullColor(color) + ');\n' +
+         sp2x + name + '.setStyle(Paint.Style.FILL);\n';
+}
+
 Paints.prototype.createInitTextPaint = function(item, name){
-    tools.dump(item.textColor());
-    return sp2x + 'Paint ' + name + ' = new Paint();\n' +
-        name + '.setAntiAlias(true);\n' +
-        name + '.setTextSize(' + item.fontSize() + ' * density);\n' +
-        name + '.setTextAlign(Paint.Align.CENTER);\n' +
-        name + '.setColor(' + this.parseColor(item) + ');\n';
+    return sp2x + name + ' = new Paint();\n' +
+         sp2x + name + '.setAntiAlias(true);\n' +
+        sp2x + name + '.setTextSize(' + item.fontSize() + ' * density);\n' +
+        sp2x + name + '.setTextAlign(Paint.Align.CENTER);\n' +
+        sp2x + name + '.setColor(' + this.parseFullColor(item.textColor()) + ');\n';
+}
+
+Paints.prototype.parseFullColor = function(color){
+    var hexAlpha = Math.floor(color.alpha() * 255).toString(16).toUpperCase();
+    hexAlpha = hexAlpha.length == 2? hexAlpha: hexAlpha + '0';
+    return '0x' + hexAlpha + color.hexValue().toString();
 }
 
 Paints.prototype.parseColor = function(item){
-    var color = item.textColor().hexValue().toString();
-    if(color.length() == 6){
-        return '0xFF' + color;
-    }else{
-        return color;
-    }
+    return '0x' + item.textColor().hexValue().toString();
 }
 
-Paints.prototype.getPaintName = function(item){
-    return this.styles['namePaint'][item.style().sharedObjectID()];
+Paints.prototype.getTextPaintName = function(item){
+    return this.db['names'][item.style().sharedObjectID()];
+}
+
+Paints.prototype.getPathPaintName = function(item){
+    return this.db['names'][item.parentGroup().style().objectID()];
 }
 
 var Text = function(layer){
   [layer makeNameUnique];
-  this._layer = layer;
+  this.layer = layer;
 
   var indexOptions = [layer name].indexOf('#');
   var options = indexOptions != -1? [layer name].substr(indexOptions+1): null;
@@ -64,56 +136,30 @@ var Text = function(layer){
   }
   this.name = clearName;
   this.onClick = options != null? options.indexOf('noclick') == -1: true;
+}
 
-
+Text.prototype.draw = function(paints){
+    var textLayer = this.layer;
+    var rect = [textLayer absoluteRect];
+    return sp2x + 'canvas.drawText(\"' + textLayer.stringValue() + '\", ' + (rect.midX()) +  'f * density, ' + (rect.midY() + (rect.height() /2)) + 'f * density, ' + paints.getTextPaintName(textLayer) + ');\n';
 }
 
 var Shape = function(layer){
-  [layer makeNameUnique];
-  this._layer = layer;
+    [layer makeNameUnique];
+    this._layer = layer;
 
-  var indexOptions = [layer name].indexOf('#');
-  var options = indexOptions != -1? [layer name].substr(indexOptions+1): null;
-  var clearName = (options ? [layer name].substr(0, indexOptions): [layer name]).replace(/\s+/g, '');
-  if(/^\d+$/.test(clearName.substr(0,1))){
-    clearName = 'shape' + clearName;
-  }
-  this.name = clearName;
-  this.onClick = options != null? options.indexOf('noclick') == -1: true;
+    var indexOptions = [layer name].indexOf('#');
+    var options = indexOptions != -1? [layer name].substr(indexOptions+1): null;
+    var clearName = (options ? [layer name].substr(0, indexOptions): [layer name]).replace(/\s+/g, '');
+    if(/^\d+$/.test(clearName.substr(0,1))){
+        clearName = 'shape' + clearName;
+    }
+    this.name = clearName;
+    this.onClick = options != null? options.indexOf('noclick') == -1: true;
 
-  /*generate code*/
-  if(this.canDraw()){
     this.path = this.getBezierPath(this._layer);
     this.property = this.getProperty();
     this.regionPropery = this.getPropertyRegion();
-  }
-}
-
-
-var Shape = function(layer){
-  [layer makeNameUnique];
-  this._layer = layer;
-
-  var indexOptions = [layer name].indexOf('#');
-  var options = indexOptions != -1? [layer name].substr(indexOptions+1): null;
-  var clearName = (options ? [layer name].substr(0, indexOptions): [layer name]).replace(/\s+/g, '');
-  if(/^\d+$/.test(clearName.substr(0,1))){
-    clearName = 'shape' + clearName;
-  }
-  this.name = clearName;
-  this.onClick = options != null? options.indexOf('noclick') == -1: true;
-
-  /*generate code*/
-  if(this.canDraw()){
-    this.path = this.getBezierPath(this._layer);
-    this.property = this.getProperty();
-    this.regionPropery = this.getPropertyRegion();
-  }
-}
-
-Shape.prototype.canDraw = function(){
-  var points = this._layer.path().points();
-  return [points count] > 2;
 }
 
 Shape.prototype.getProperty = function(){
@@ -136,12 +182,16 @@ Shape.prototype.getShapeInit = function(){
   return this.path;
 }
 
-Shape.prototype.getPaint = function(){
-  return 'mPaint';
-}
-
-Shape.prototype.getDraw = function(){
-  return sp2x + 'canvas.drawPath(' + this.name + ',' + this.getPaint() + ');\n';
+Shape.prototype.getDraw = function(paints){
+  var paintsName = paints.getPathPaintName(this._layer);
+  var draw = '';
+  if(paintsName['fill']){
+      draw += sp2x + 'canvas.drawPath(' + this.name + ',' + paintsName['fill']  + ');\n';
+  }
+  if(paintsName['border']){
+      draw += sp2x + 'canvas.drawPath(' + this.name + ',' + paintsName['border']  + ');\n';
+  }
+  return draw;
 }
 
 Shape.prototype.getRegionInit = function(){

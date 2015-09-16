@@ -19,7 +19,7 @@ var onRun = function (context) {
 		return;
 	}
 
-	var message = 'Shapes are ' + figures['paths'].length;
+	var message = 'Paths ' + figures['paths'].length + ', texts ' + figures['texts'].length;
 	ui.alert('Shapes', message);
 
 	var surficeSize = '(int)((' + selection[0].frame().x() + 'f * 2f + ' + selection[0].frame().width() + 'f) * density), '
@@ -36,20 +36,33 @@ var onRun = function (context) {
 		SurficeSize: surficeSize
 	};
 
-	for(var i = 0; i < figures['paths'].length; i++){
-		var shape = new Shape(figures['paths'][i]);
-		if(shape.canDraw()){
-			data.shapesProperties += shape.getProperty();
-			data.shapesInit += shape.getShapeInit();
-			data.regionsInit += shape.getRegionInit();
-			data.draw += shape.getDraw();
-		}
-	}
 	var paints = new Paints();
-	for(var i = 0; i < figures['texts'].length; i++){
-		var text = figures['texts'][i];
-		paints.addPaint(text);
+	for(var i = 0; i < figures['paths'].length; i++){
+		var figure = figures['paths'][i];
+		paints.addPaint(figure);
+		var shape = new Shape(figure);
+
+		data.shapesProperties += shape.getProperty();
+		data.shapesInit += shape.getShapeInit();
+		data.regionsInit += shape.getRegionInit();
+		data.draw += shape.getDraw(paints);
 	}
+
+	for(var i = 0; i < figures['texts'].length; i++){
+		var figure = figures['texts'][i];
+		paints.addPaint(figure);
+		var text = new Text(figure);
+		data.draw += text.draw(paints);
+	}
+
+	paints.properties().forEach(function(item, i, arr) {
+  		data.paintsProperties += item;
+	});
+
+	paints.inits().forEach(function(item, i, arr) {
+  		data.paintInit += item;
+	});
+
 	log(paints);
 	writeTemplate("view.java", OUT_DIR + data.className + '.java', data);
 };

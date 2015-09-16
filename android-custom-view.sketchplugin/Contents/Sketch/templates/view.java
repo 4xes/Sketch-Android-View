@@ -22,18 +22,17 @@ import android.view.View;
 import android.widget.OverScroller;
 
 public class {{fileName}} extends View{
-  public static final String TAG = "{{fileName}}";
-  private GestureDetectorCompat mGestureDetector;
-  private OverScroller mScroller;
-  private ArrayMap<String, Region> mRegions = new ArrayMap<>();
+    public static final String TAG = "{{fileName}}";
+    private GestureDetectorCompat mGestureDetector;
+    private OverScroller mScroller;
+    private ArrayMap<String, Region> mRegions = new ArrayMap<>();
 
-  private Rect mContentRect = new Rect();
-  private Point mSurfaceSize = new Point();
-  private Point mStartViewPort = new Point();
-  private Point mPoint = new Point();
+    private Rect mContentRect = new Rect();
+    private Point mSurfaceSize = new Point();
+    private Point mStartViewPort = new Point();
+    private Point mPoint = new Point();
 
-
-  private Paint mPaint;
+    private float density;
 
 {{shapesProperties}}
 {{paintsProperties}}
@@ -60,16 +59,11 @@ public class {{fileName}} extends View{
     }
 
     public void init(Context context){
-      float density = context.getResources().getDisplayMetrics().density;
+        density = context.getResources().getDisplayMetrics().density;
 
-      mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
-      mScroller = new OverScroller(context);
-      mSurfaceSize.set({{SurficeSize}});
-
-      mPaint = new Paint();
-      mPaint.setAntiAlias(true);
-      mPaint.setColor(0xFFC9CDD0);
-      mPaint.setStyle(Paint.Style.FILL);
+        mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
+        mScroller = new OverScroller(context);
+        mSurfaceSize.set({{SurficeSize}});
 
 {{paintInit}}
 {{shapesInit}}
@@ -81,7 +75,7 @@ public class {{fileName}} extends View{
 
     @Override
     public void onDraw(Canvas canvas) {
-      canvas.translate(-mStartViewPort.x, -mStartViewPort.y);
+        canvas.translate(-mStartViewPort.x, -mStartViewPort.y);
 {{draw}}
     }
 

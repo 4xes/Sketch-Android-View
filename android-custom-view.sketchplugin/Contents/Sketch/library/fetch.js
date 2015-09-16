@@ -35,7 +35,6 @@ f.fetching = function (figures, obj) {
             figures['paths'].push(obj);
             break;
         case MSTextLayer:
-            tools.dump(obj);
             figures['texts'].push(obj);
             break;
     }
