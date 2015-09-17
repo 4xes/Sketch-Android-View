@@ -31,6 +31,11 @@ public class {{viewName}} extends View {
 
     public void setScrollListener(OnScrollListener mScrollListener) {
         this.mScrollListener = mScrollListener;
+        if(mScrollListener != null){
+            mScrollListener.onChangeSize(mSize.x, mSize.y);
+            mScrollListener.onChangeContent(mContent.width(), mContent.height());
+            mScrollListener.onChangeScroll(mScroll.x, mScroll.y);
+        }
     }
 
     public interface OnScrollListener {
@@ -181,7 +186,7 @@ public class {{viewName}} extends View {
         @Override
         public boolean onDown(MotionEvent e) {
             mScroller.forceFinished(true);
-            ViewCompat.postInvalidateOnAnimation(CustomVectorView.this);
+            ViewCompat.postInvalidateOnAnimation({{viewName}}.this);
             return true;
         }
 
