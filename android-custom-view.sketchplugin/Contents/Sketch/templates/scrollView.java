@@ -1,4 +1,4 @@
-package org.armstrong.arena;
+package {{packageName}};
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -21,15 +21,48 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.OverScroller;
 
-public class {{fileName}} extends View{
-    public static final String TAG = "{{fileName}}";
+public class {{viewName}} extends View {
+    public static final String TAG = "{{viewName}}";
+
+
+    public OnScrollListener getScrollListener() {
+        return mScrollListener;
+    }
+
+    public void setScrollListener(OnScrollListener mScrollListener) {
+        this.mScrollListener = mScrollListener;
+    }
+
+    public interface OnScrollListener {
+        void onChangeScroll(final int x, final int y);
+
+        void onChangeContent(final int width,final int height);
+
+        void onChangeSize(final int maxWidth, final int maxHeight);
+    }
+
+    private OnScrollListener mScrollListener;
     private GestureDetectorCompat mGestureDetector;
     private OverScroller mScroller;
     private ArrayMap<String, Region> mRegions = new ArrayMap<>();
 
-    private Rect mContentRect = new Rect();
-    private Point mSurfaceSize = new Point();
-    private Point mStartViewPort = new Point();
+    /**
+     * mContent is visible space
+     */
+    private Rect mContent = new Rect();
+    /**
+     * mSize is full size drawing space
+     * .x - right side
+     * .y - bottom side
+     */
+    private Point mSize = new Point();
+
+    /**
+     * mScroll current offset scroll
+     * .x - between 0 and mSize.x
+     * .y - between 0 and mSize.y
+     */
+    private Point mScroll = new Point();
     private Point mPoint = new Point();
 
     private float density;
@@ -37,56 +70,65 @@ public class {{fileName}} extends View{
 {{shapesProperties}}
 {{paintsProperties}}
 
-    public {{fileName}}(Context context) {
+    public {{viewName}}(Context context) {
         super(context);
         init(context);
     }
 
-    public {{fileName}}(Context context, AttributeSet attrs) {
+    public {{viewName}}(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public {{fileName}}(Context context, AttributeSet attrs, int defStyleAttr) {
+    public {{viewName}}(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public {{fileName}}(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public {{viewName}}(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context);
     }
 
-    public void init(Context context){
+    public void init(Context context) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
+            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
         density = context.getResources().getDisplayMetrics().density;
 
         mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
         mScroller = new OverScroller(context);
-        mSurfaceSize.set({{SurficeSize}});
+        mSize.set({{sizeView}});
+
+        if (mScrollListener != null) {
+            mScrollListener.onChangeSize(mSize.x, mSize.y);
+        }
 
 {{paintInit}}
 {{shapesInit}}
-
         RectF bounds = new RectF();
 {{regionsInit}}
     }
 
-
     @Override
     public void onDraw(Canvas canvas) {
-        canvas.translate(-mStartViewPort.x, -mStartViewPort.y);
+        canvas.translate(-mScroll.x, -mScroll.y);
 {{draw}}
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mContentRect.set(
+        mContent.set(
                 getPaddingLeft(),
                 getPaddingTop(),
                 getWidth() - getPaddingRight(),
                 getHeight() - getPaddingBottom());
+
+        if(mScrollListener != null){
+            mScrollListener.onChangeContent(mContent.width(), mContent.height());
+        }
     }
 
     @Override
@@ -100,8 +142,8 @@ public class {{fileName}} extends View{
             int currX = mScroller.getCurrX();
             int currY = mScroller.getCurrY();
 
-            float currXRange = currX - mStartViewPort.x;
-            float currYRange = currY - mStartViewPort.y;
+            float currXRange = currX - mScroll.x;
+            float currYRange = currY - mScroll.y;
             setViewportBottomLeft(currXRange, currYRange);
         }
     }
@@ -147,8 +189,8 @@ public class {{fileName}} extends View{
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            mPoint.x = (int)e.getX() + mStartViewPort.x;
-            mPoint.y = (int)e.getY() + mStartViewPort.y;
+            mPoint.x = (int)e.getX() + mScroll.x;
+            mPoint.y = (int)e.getY() + mScroll.y;
 
             for(int i = 0; i< mRegions.size(); i++){
                 if(mRegions.valueAt(i).contains(mPoint.x, mPoint.y)){
@@ -160,13 +202,17 @@ public class {{fileName}} extends View{
     };
 
     private void setViewportBottomLeft(float dx, float dy) {
-        float x = mStartViewPort.x + dx < 0 ? 0:
-                mStartViewPort.x + dx + mContentRect.width() < mSurfaceSize.x ? mStartViewPort.x + dx: mSurfaceSize.x - mContentRect.width();
-        float y  = mStartViewPort.y + dy < 0 ? 0:
-                mStartViewPort.y + dy + mContentRect.height() < mSurfaceSize.y ? mStartViewPort.y + dy: mSurfaceSize.y - mContentRect.height();
-        if(!mStartViewPort.equals((int)x, (int)y)) {
-            mStartViewPort.set((int)x, (int)y);
+        float x = mScroll.x + dx < 0 ? 0:
+                mScroll.x + dx + mContent.width() < mSize.x ? mScroll.x + dx: mSize.x - mContent.width();
+        float y  = mScroll.y + dy < 0 ? 0:
+                mScroll.y + dy + mContent.height() < mSize.y ? mScroll.y + dy: mSize.y - mContent.height();
+        if(!mScroll.equals((int)x, (int)y)) {
+            mScroll.set((int)x, (int)y);
             ViewCompat.postInvalidateOnAnimation(this);
+
+            if(mScrollListener != null){
+                mScrollListener.onChangeScroll(mScroll.x, mScroll.y);
+            }
         }
     }
 
@@ -174,14 +220,14 @@ public class {{fileName}} extends View{
     private void fling(int velocityX, int velocityY) {
         mScroller.forceFinished(true);
         mScroller.fling(
-                mStartViewPort.x,
-                mStartViewPort.y,
+                mScroll.x,
+                mScroll.y,
                 velocityX/2,
                 velocityY/2,
-                0, mSurfaceSize.x - mContentRect.width(),
-                0, mSurfaceSize.y - mContentRect.height(),
-                mContentRect.width() / 2,
-                mContentRect.height() / 2);
+                0, mSize.x - mContent.width(),
+                0, mSize.y - mContent.height(),
+                mContent.width() / 2,
+                mContent.height() / 2);
         ViewCompat.postInvalidateOnAnimation(this);
     }
 }

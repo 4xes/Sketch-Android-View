@@ -3,9 +3,7 @@
 @import 'library/shape.js'
 @import 'library/devel-tools.js'
 @import 'library/tinytim.js'
-
-var PLUGIN_PATH = '/Users/alex/Library/Application\ Support/com.bohemiancoding.sketch3/Plugins/android-custom-view.sketchplugin/Contents/Sketch/';
-var OUT_DIR = '/Users/alex/Documents/Projects/Plugin/out/';
+@import 'options.js'
 
 var onRun = function (context) {
 	var doc = context.document;
@@ -26,14 +24,15 @@ var onRun = function (context) {
 									+ '(int)((' + selection[0].frame().y() + 'f * 2f + ' + selection[0].frame().height() + 'f) * density)';
 
 	var data = {
-		fileName: "CustomVectorView",
+		viewName: options.out.viewName,
+		packageName: options.out.packageName,
 		shapesProperties: "",
 		paintsProperties: "",
 		paintInit: "",
 		shapesInit: "",
 		regionsInit: "",
 		draw: "",
-		SurficeSize: surficeSize
+		sizeView: surficeSize
 	};
 
 	var paints = new Paints();
@@ -63,19 +62,24 @@ var onRun = function (context) {
   		data.paintInit += item;
 	});
 
-	log(paints);
-	writeTemplate("view.java", OUT_DIR + data.className + '.java', data);
+	out(data);
 };
 
-function writeTemplate(tmpl, path, locals){
-  locals = locals || {}
-
-  var filePath = PLUGIN_PATH + '/templates/' + tmpl
-  var template = [NSString stringWithContentsOfFile:filePath
+function readTemplate(){
+	var tmplPath = options.plugin.templatePath + options.plugin.template;
+	return [NSString stringWithContentsOfFile:tmplPath
                                            encoding:NSUTF8StringEncoding
-                                              error:null]
-  var layout = tim(template, locals);
-  layout = [NSString stringWithString:layout]
-  [layout writeToFile:path atomically:false]
-	log("complete");
+                                              error:null];
+}
+
+function writeView(layout){
+	var outPath = options.out.path + options.out.viewName + '.java';
+	[[NSString stringWithString:layout] writeToFile:outPath atomically:false];
+}
+
+function out(locals){
+	locals = locals || {}
+	var template = readTemplate();
+	var layout = tim(template, locals);
+  	writeView(layout);
 }
