@@ -69,6 +69,8 @@ public class {{viewName}} extends View {
      */
     private Point mScroll = new Point();
     private Point mPoint = new Point();
+    protected boolean hasVerticalScroll;
+    protected boolean hasHorizontalScroll;
 
     private float density;
 
@@ -131,6 +133,9 @@ public class {{viewName}} extends View {
                 getWidth() - getPaddingRight(),
                 getHeight() - getPaddingBottom());
 
+        hasHorizontalScroll = mContent.width() < mSize.x;
+        hasVerticalScroll = mContent.height() < mSize.y;
+
         if(mScrollListener != null){
             mScrollListener.onChangeContent(mContent.width(), mContent.height());
         }
@@ -153,16 +158,14 @@ public class {{viewName}} extends View {
         }
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int minSize = (int) (200 * getContext().getResources().getDisplayMetrics().density);
-        setMeasuredDimension(
-                Math.max(getSuggestedMinimumWidth(),
-                        resolveSize(minSize + getPaddingLeft() + getPaddingRight(),
-                                widthMeasureSpec)),
-                Math.max(getSuggestedMinimumHeight(),
-                        resolveSize(minSize + getPaddingTop() + getPaddingBottom(),
-                                heightMeasureSpec)));
+@Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int minSizeWidth = mSize.x;
+    int minSizeHeight = mSize.y;
+
+    setMeasuredDimension(Math.max(getSuggestedMinimumWidth(),
+    resolveSize(minSizeWidth + getPaddingLeft() + getPaddingRight(), widthMeasureSpec)),
+    Math.max(getSuggestedMinimumHeight(),
+    resolveSize(minSizeHeight + getPaddingTop() + getPaddingBottom(), heightMeasureSpec)));
     }
 
     @Override
@@ -191,26 +194,36 @@ public class {{viewName}} extends View {
         }
 
 
-
+        //handle clicks
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             mPoint.x = (int)e.getX() + mScroll.x;
             mPoint.y = (int)e.getY() + mScroll.y;
 
+            boolean handled = false;
+            //check in all shapes
             for(int i = 0; i< mRegions.size(); i++){
+                //check i touched shape[i]
                 if(mRegions.valueAt(i).contains(mPoint.x, mPoint.y)){
                     Log.d(TAG, "Touch inside " + mRegions.keyAt(i));
+                    handled = true;
                 }
             }
-            return true;
+            return handled;
         }
     };
 
     private void setViewportBottomLeft(float dx, float dy) {
-        float x = mScroll.x + dx < 0 ? 0:
-                mScroll.x + dx + mContent.width() < mSize.x ? mScroll.x + dx: mSize.x - mContent.width();
-        float y  = mScroll.y + dy < 0 ? 0:
-                mScroll.y + dy + mContent.height() < mSize.y ? mScroll.y + dy: mSize.y - mContent.height();
+        float x = 0;
+        float y = 0;
+        if (hasHorizontalScroll) {
+            x = mScroll.x + dx < 0 ? 0 : mScroll.x + dx + mContent.width() < mSize.x ? mScroll.x + dx
+            : mSize.x - mContent.width();
+        }
+        if (hasVerticalScroll) {
+            y = mScroll.y + dy < 0 ? 0 : mScroll.y + dy + mContent.height() < mSize.y ? mScroll.y + dy
+            : mSize.y - mContent.height();
+        }
         if(!mScroll.equals((int)x, (int)y)) {
             mScroll.set((int)x, (int)y);
             ViewCompat.postInvalidateOnAnimation(this);

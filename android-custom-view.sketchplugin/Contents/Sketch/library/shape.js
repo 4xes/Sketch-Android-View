@@ -125,7 +125,6 @@ Paints.prototype.getPathPaintName = function(item){
 }
 
 var Text = function(layer){
-  [layer makeNameUnique];
   this.layer = layer;
 
   var indexOptions = [layer name].indexOf('#');
@@ -145,7 +144,6 @@ Text.prototype.draw = function(paints){
 }
 
 var Shape = function(layer){
-    [layer makeNameUnique];
     this._layer = layer;
 
     var indexOptions = [layer name].indexOf('#');

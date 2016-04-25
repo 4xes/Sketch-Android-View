@@ -20,7 +20,7 @@ var onRun = function (context) {
 	var message = 'Paths ' + figures['paths'].length + ', texts ' + figures['texts'].length;
 	ui.alert('Shapes', message);
 
-	var surficeSize = '(int)((' + selection[0].frame().x() + 'f * 2f + ' + selection[0].frame().width() + 'f) * density), '
+	var sizeView = '(int)((' + selection[0].frame().x() + 'f * 2f + ' + selection[0].frame().width() + 'f) * density), '
 									+ '(int)((' + selection[0].frame().y() + 'f * 2f + ' + selection[0].frame().height() + 'f) * density)';
 
 	var data = {
@@ -32,7 +32,7 @@ var onRun = function (context) {
 		shapesInit: "",
 		regionsInit: "",
 		draw: "",
-		sizeView: surficeSize
+		sizeView: sizeView
 	};
 
 	var paints = new Paints();
@@ -66,8 +66,8 @@ var onRun = function (context) {
 };
 
 function readTemplate(){
-	var tmplPath = options.plugin.templatePath + options.plugin.template;
-	return [NSString stringWithContentsOfFile:tmplPath
+	var template = options.template.path;
+	return [NSString stringWithContentsOfFile:template
                                            encoding:NSUTF8StringEncoding
                                               error:null];
 }
