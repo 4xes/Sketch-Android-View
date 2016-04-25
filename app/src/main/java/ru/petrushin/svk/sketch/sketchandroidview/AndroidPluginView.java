@@ -3,6 +3,7 @@ package ru.petrushin.svk.sketch.sketchandroidview;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -20,6 +21,9 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.OverScroller;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AndroidPluginView extends View {
     public static final String TAG = "AndroidPluginView";
@@ -82,6 +86,23 @@ public class AndroidPluginView extends View {
     private Paint paintText3;
     private Paint paintText4;
 
+    public class PointClick {
+        Point point;
+        boolean inTarget;
+
+        public PointClick(Point point, boolean inTarget) {
+            this.point = point;
+            this.inTarget = inTarget;
+        }
+    }
+
+    //for demo
+    List<PointClick> clicksList = new ArrayList<>();
+    //paint demo
+    private Paint paintDemoInTarget;
+    private Paint paintDemoInOut;
+
+
     public AndroidPluginView(Context context) {
         super(context);
         init(context);
@@ -126,6 +147,17 @@ public class AndroidPluginView extends View {
         paintFill1.setAntiAlias(true);
         paintFill1.setColor(0xFF3771F8);
         paintFill1.setStyle(Paint.Style.FILL);
+
+        //demo paints
+        paintDemoInTarget = new Paint();
+        paintDemoInTarget.setAntiAlias(true);
+        paintDemoInTarget.setColor(Color.CYAN);
+        paintDemoInTarget.setStyle(Paint.Style.FILL);
+        paintDemoInOut = new Paint();
+        paintDemoInOut.setAntiAlias(true);
+        paintDemoInOut.setColor(Color.YELLOW);
+        paintDemoInOut.setStyle(Paint.Style.FILL);
+
         paintBorder2 = new Paint();
         paintBorder2.setAntiAlias(true);
         paintBorder2.setColor(0xFF979797);
@@ -211,6 +243,10 @@ public class AndroidPluginView extends View {
         canvas.drawPath(Path, paintBorder2);
         canvas.drawText("Figure 1", 116f * density, 164f * density, paintText3);
         canvas.drawText("Sample text", 83.5f * density, 90f * density, paintText4);
+
+        for(PointClick point: clicksList){
+            canvas.drawCircle(point.point.x, point.point.y, 3 * density, point.inTarget? paintDemoInTarget: paintDemoInOut);
+        }
     }
 
     @Override
@@ -293,12 +329,16 @@ public class AndroidPluginView extends View {
                         //check i touched shape[i]
                         if (mRegions.valueAt(i).contains(mPoint.x, mPoint.y)) {
                             showMessage("Click on " + mRegions.keyAt(i));
+
+                            clicksList.add(new PointClick(new Point(mPoint), true));
                             handled = true;
                         }
                     }
                     if (!handled) {
+                        clicksList.add(new PointClick(new Point(mPoint), false));
                         showMessage("Not in shape");
                     }
+                    invalidate();
                     return handled;
                 }
             };
