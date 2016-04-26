@@ -38,9 +38,9 @@
     };
     
     ```
-4. Select your shapes
-  <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
-5. Plugins -> AndroidVectorView -> Generate custom view
+4. Select your shapes.
+    <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
+5. Plugins -> AndroidVectorView -> Generate custom view.
 6. Find you custom View in path witch your determine in (3).
 
 
