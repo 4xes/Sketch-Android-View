@@ -1,39 +1,64 @@
+
 # Sketch-Android-View
 ## This plugin will help you create view with shape's path and all styles.
+[How to install plugin](http://developer.sketchapp.com/introduction/)
 
 ### Why this need?
-1. If you want determine click on very complex form view 
-2. 
+1. If you want determine click from not rectangle figures.
+2. Create complicated custom view.
 
 ### What's support?
 1. Text
-2. Rectangle
+2. Rectangle (Not supported, but you can convert it in vector path)
 3. Circle
-4. VectorPath
-5. Borders
+4. Vector
+3. Line
+5. Fill and border
 6. Styles
+7. Shadow (Not supported)
 
 
 ### How to use?
-1. Determine layers, rect, circle and other with names with '#'
-2. Default all shapes adding to onclick listener. [In default template.](../master/android-custom-view.sketchplugin/Contents/Sketch/templates/scrollView.java)
-  ```java
-          @Override
-          //listener click on shapes
-          public boolean onSingleTapConfirmed(MotionEvent e) {
-              mPoint.x = (int)e.getX() + mScroll.x;
-              mPoint.y = (int)e.getY() + mScroll.y;
-  
-              for(int i = 0; i< mRegions.size(); i++){
-                  if(mRegions.valueAt(i).contains(mPoint.x, mPoint.y)){
-                      //logging click
-                      Log.d(TAG, "Touch inside " + mRegions.keyAt(i));
-                  }
-              }
-              return true;
-          }
+1. Change your paths in [options.js](../master/android-custom-view.sketchplugin/Contents/Sketch/options.js) 
+2. Create new sketch file, add artboard with positions (0,0).
+3. Make names your shapes with '#'
+  ```javascript
+    template: {
+        <!-- change save path on default template or just replace {user} -->
+        path: '/Users/{user}/Library/Application\ Support/com.bohemiancoding.sketch3/Plugins/android-custom-view.sketchplugin/Contents/Sketch/templates/ScrollView.java'
+    },
+    out:{
+        path: '/Users/{user}/Documents/', <!-- change save path or replace {user} -->
+        packageName: 'com.example.plugin',
+        viewName: 'AndroidPluginView'
+    }
   ```
-3. You can determine custom template for class view.
-4. Also need change settings for saving class in [options.js](../master/android-custom-view.sketchplugin/Contents/Sketch/options.js)
+4. Select your shapes
+  <img src="/art/screen0.png?raw=true" width=360 height=640 alt="Screen list">
+5. Plugins -> AndroidVectorView -> Generate custom view
+6. Find you custom View in path witch your determine in (3).
 
-[How to install](http://developer.sketchapp.com/introduction/)
+
+
+### Also.
+1. For default all shapes added for click listener. [Default template.](../master/android-custom-view.sketchplugin/Contents/Sketch/templates/scrollView.java)
+  ```java
+    //handle clicks
+    @Override public boolean onSingleTapConfirmed(MotionEvent e) {
+      mPoint.x = (int) e.getX() + mScroll.x;
+      mPoint.y = (int) e.getY() + mScroll.y;
+      
+      boolean handled = false;
+      //check in all shapes
+      for (int i = 0; i < mRegions.size(); i++) {
+        //if touched any shape
+        if (mRegions.valueAt(i).contains(mPoint.x, mPoint.y)) {
+          showMessage("Click on " + mRegions.keyAt(i));
+          handled = true;
+        }
+      }
+    return handled;
+    }
+  ```
+2. You can determine custom template for class view and set it in [options.js](../master/android-custom-view.sketchplugin/Contents/Sketch/options.js)
+
