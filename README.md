@@ -39,7 +39,8 @@
 2. Create new sketch file, add artboard with positions (0,0).
 3. Make names your shapes with '#'
 4. Select your shapes.
-    <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
+    
+  <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
 
 5. Plugins -> AndroidVectorView -> Generate custom view.
 6. Find you custom view in path witch your determine in (3).
