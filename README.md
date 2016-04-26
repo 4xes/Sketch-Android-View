@@ -46,7 +46,7 @@
 6. Find you custom view in path witch your determine in (3).
 
 ### Also.
-1. For default all shapes added for click listener. [Default template.](../master/android-custom-view.sketchplugin/Contents/Sketch/templates/scrollView.java)
+1. For default all shapes added for click listener. [Default template.](../master/android-custom-view.sketchplugin/Contents/Sketch/templates/CustomScrollView.java)
   ```java
     //handle clicks
     @Override public boolean onSingleTapConfirmed(MotionEvent e) {
