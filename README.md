@@ -33,7 +33,7 @@
         out:{
             path: '/Users/{user}/Documents/',
             packageName: 'com.example.plugin',
-            viewName: 'AndroidPluginView'
+            viewName: 'CustomScrollView'
         }
     };
     
