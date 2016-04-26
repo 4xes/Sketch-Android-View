@@ -1,6 +1,6 @@
 
 # Sketch-Android-View
-## This plugin will help you create view with shape's path and all styles.
+### This plugin allow you to generate Android graphics from sketch.
 <img src="/art/demo.gif?raw=true" width=360 height=640 alt="Demo">
 
 [How to install plugin](http://developer.sketchapp.com/introduction/)
@@ -40,6 +40,7 @@
 3. Make names your shapes with '#'
 4. Select your shapes.
     <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
+
 5. Plugins -> AndroidVectorView -> Generate custom view.
 6. Find you custom view in path witch your determine in (3).
 
