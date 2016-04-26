@@ -1,6 +1,8 @@
 
 # Sketch-Android-View
 ## This plugin will help you create view with shape's path and all styles.
+<img src="/art/demo.gif?raw=true" width=360 height=640 alt="Demo">
+
 [How to install plugin](http://developer.sketchapp.com/introduction/)
 
 ### Why this need?
@@ -22,19 +24,22 @@
 1. Change your paths in [options.js](../master/android-custom-view.sketchplugin/Contents/Sketch/options.js) 
 2. Create new sketch file, add artboard with positions (0,0).
 3. Make names your shapes with '#'
-  ```javascript
-    template: {
-        <!-- change save path on default template or just replace {user} -->
-        path: '/Users/{user}/Library/Application\ Support/com.bohemiancoding.sketch3/Plugins/android-custom-view.sketchplugin/Contents/Sketch/templates/ScrollView.java'
-    },
-    out:{
-        path: '/Users/{user}/Documents/', <!-- change save path or replace {user} -->
-        packageName: 'com.example.plugin',
-        viewName: 'AndroidPluginView'
-    }
-  ```
+    ```javascript
+    
+    var options = {
+        template: {
+            path: '/Users/{user}/Library/Application\ Support/com.bohemiancoding.sketch3/Plugins/android-custom-view.sketchplugin/Contents/Sketch/templates/ScrollView.java'
+        },
+        out:{
+            path: '/Users/{user}/Documents/',
+            packageName: 'com.example.plugin',
+            viewName: 'AndroidPluginView'
+        }
+    };
+    
+    ```
 4. Select your shapes
-  <img src="/art/screen0.png?raw=true" width=360 height=640 alt="Screen list">
+  <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
 5. Plugins -> AndroidVectorView -> Generate custom view
 6. Find you custom View in path witch your determine in (3).
 
