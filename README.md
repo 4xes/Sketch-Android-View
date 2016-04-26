@@ -22,8 +22,6 @@
 
 ### How to use?
 1. Change your paths in [options.js](../master/android-custom-view.sketchplugin/Contents/Sketch/options.js) 
-2. Create new sketch file, add artboard with positions (0,0).
-3. Make names your shapes with '#'
     ```javascript
     
     var options = {
@@ -37,13 +35,13 @@
         }
     };
     
-    ```
+    ``` 
+2. Create new sketch file, add artboard with positions (0,0).
+3. Make names your shapes with '#'
 4. Select your shapes.
     <img src="/art/screen0.png?raw=true" width=703 height=358 alt="Screen list">
 5. Plugins -> AndroidVectorView -> Generate custom view.
-6. Find you custom View in path witch your determine in (3).
-
-
+6. Find you custom view in path witch your determine in (3).
 
 ### Also.
 1. For default all shapes added for click listener. [Default template.](../master/android-custom-view.sketchplugin/Contents/Sketch/templates/scrollView.java)
